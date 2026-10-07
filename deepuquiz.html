@@ -1,0 +1,2965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CodeQuest - Quiz & Coding Practice</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f5f7fb;
+    color:#202038;
+}
+
+/* NAVBAR */
+.navbar{
+    box-shadow:0 3px 15px rgba(0,0,0,.08);
+}
+
+.navbar-brand{
+    font-weight:800;
+    font-size:24px;
+}
+
+/* HERO */
+.hero{
+    min-height:80vh;
+    display:flex;
+    align-items:center;
+    background:
+        radial-gradient(circle at 85% 20%,rgba(108,92,231,.2),transparent 30%),
+        radial-gradient(circle at 10% 80%,rgba(0,184,148,.15),transparent 30%),
+        linear-gradient(135deg,#fff,#f0efff);
+}
+
+.hero-title{
+    font-size:clamp(40px,7vw,75px);
+    font-weight:800;
+}
+
+.gradient{
+    background:linear-gradient(90deg,#6c5ce7,#00b894);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.card-custom{
+    background:white;
+    border-radius:22px;
+    padding:25px;
+    box-shadow:0 10px 35px rgba(0,0,0,.08);
+}
+
+.course-card{
+    transition:.3s;
+    height:100%;
+}
+
+.course-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 18px 40px rgba(0,0,0,.15);
+}
+
+.course-icon{
+    width:60px;
+    height:60px;
+    border-radius:18px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:28px;
+    background:#eeeaff;
+    color:#6c5ce7;
+}
+
+/* AUTH */
+.auth{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#18182c,#5144b5,#00b894);
+    padding:20px;
+}
+
+.auth-box{
+    width:450px;
+    max-width:100%;
+    background:white;
+    padding:35px;
+    border-radius:25px;
+    box-shadow:0 25px 70px rgba(0,0,0,.3);
+}
+
+/* SIDEBAR */
+.sidebar{
+    background:#17172b;
+    color:white;
+    min-height:calc(100vh - 66px);
+    padding:20px;
+}
+
+.sidebar a{
+    display:block;
+    color:#cfd0e5;
+    text-decoration:none;
+    padding:13px;
+    margin:5px 0;
+    border-radius:12px;
+}
+
+.sidebar a:hover,
+.sidebar a.active{
+    background:#353552;
+    color:white;
+}
+
+/* STAT */
+.stat{
+    background:white;
+    padding:20px;
+    border-radius:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,.07);
+}
+
+.stat-number{
+    font-size:30px;
+    font-weight:800;
+}
+
+.coin{
+    color:#f5a623;
+}
+
+.streak{
+    color:#ff6337;
+}
+
+/* QUESTION */
+.option{
+    padding:16px;
+    border:2px solid #e5e5ef;
+    border-radius:15px;
+    margin-bottom:12px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    border-color:#6c5ce7;
+    background:#f7f5ff;
+}
+
+.option.selected{
+    background:#eeeaff;
+    border-color:#6c5ce7;
+}
+
+/* CODE */
+.code{
+    background:#161625;
+    color:#eee;
+    padding:20px;
+    border-radius:15px;
+    white-space:pre-wrap;
+    font-family:Consolas,monospace;
+}
+
+/* ANIMATION */
+.animate{
+    animation:slide .5s ease;
+}
+
+@keyframes slide{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.float{
+    animation:float 3s infinite ease-in-out;
+}
+
+@keyframes float{
+    50%{
+        transform:translateY(-12px);
+    }
+}
+
+/* MOBILE */
+@media(max-width:768px){
+
+    .sidebar{
+        min-height:auto;
+    }
+
+    .hero{
+        padding:60px 0;
+    }
+
+    .hero-title{
+        font-size:45px;
+    }
+
+    .main{
+        padding:15px !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<!-- BOOTSTRAP -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+/* =====================================================
+   DATABASE
+===================================================== */
+
+let database = JSON.parse(localStorage.getItem("codequestDB")) || {
+
+users:[
+    {
+        id:"ADM001",
+        name:"Administrator",
+        email:"admin@demo.com",
+        password:"admin123",
+        role:"admin",
+        coins:0,
+        streak:0
+    },
+    {
+        id:"STU001",
+        name:"Demo Student",
+        email:"student@demo.com",
+        password:"student123",
+        role:"student",
+        coins:100,
+        streak:3
+    }
+],
+
+quizzes:[
+{
+    id:"q1",
+    course:"Python",
+    title:"Python Basics",
+    time:5,
+    questions:[
+        {
+            question:"Which keyword is used to define a function in Python?",
+            options:["function","define","def","fun"],
+            answer:2,
+            explanation:"Python uses the 'def' keyword to define a function."
+        },
+        {
+            question:"Which data type stores key-value pairs?",
+            options:["List","Tuple","Dictionary","Set"],
+            answer:2,
+            explanation:"A dictionary stores data using key-value pairs."
+        },
+        {
+            question:"Which symbol is used for a Python comment?",
+            options:["//","#","/*","--"],
+            answer:1,
+            explanation:"Python single-line comments begin with #."
+        },
+        {
+            question:"Which collection is ordered and changeable?",
+            options:["Tuple","Set","List","Dictionary"],
+            answer:2,
+            explanation:"A Python list is ordered and mutable."
+        },
+        {
+            question:"What does len() return?",
+            options:["Value","Length","Type","Index"],
+            answer:1,
+            explanation:"len() returns the number of items in an object."
+        }
+    ]
+},
+
+{
+    id:"q2",
+    course:"Java",
+    title:"Java Fundamentals",
+    time:5,
+    questions:[
+        {
+            question:"Which keyword creates an object in Java?",
+            options:["class","new","this","object"],
+            answer:1,
+            explanation:"The new keyword creates an object."
+        },
+        {
+            question:"What is the entry point of Java?",
+            options:["start()","run()","main()","init()"],
+            answer:2,
+            explanation:"Java programs normally start execution from main()."
+        },
+        {
+            question:"Java source files use which extension?",
+            options:[".js",".java",".class",".jav"],
+            answer:1,
+            explanation:"Java source files use the .java extension."
+        },
+        {
+            question:"Which keyword prevents inheritance?",
+            options:["static","private","final","const"],
+            answer:2,
+            explanation:"A final class cannot be inherited."
+        },
+        {
+            question:"Which concept allows one class to acquire another class properties?",
+            options:["Inheritance","Compilation","Looping","Casting"],
+            answer:0,
+            explanation:"Inheritance allows a child class to acquire properties of a parent class."
+        }
+    ]
+},
+
+{
+    id:"q3",
+    course:"C",
+    title:"C Programming",
+    time:5,
+    questions:[
+        {
+            question:"Which symbol ends a C statement?",
+            options:[".",";",":",","],
+            answer:1,
+            explanation:"Most C statements end with a semicolon."
+        },
+        {
+            question:"Which function is used for output?",
+            options:["print()","printf()","cout()","display()"],
+            answer:1,
+            explanation:"printf() is commonly used for formatted output in C."
+        },
+        {
+            question:"Which header contains printf()?",
+            options:["math.h","string.h","stdio.h","stdlib.hpp"],
+            answer:2,
+            explanation:"printf() is declared in stdio.h."
+        },
+        {
+            question:"Which operator gets an address?",
+            options:["*","&","%","#"],
+            answer:1,
+            explanation:"The & operator returns the address of a variable."
+        },
+        {
+            question:"C is mainly a ____ language.",
+            options:["Markup","Procedural","Database","Styling"],
+            answer:1,
+            explanation:"C is primarily a procedural programming language."
+        }
+    ]
+},
+
+{
+    id:"q4",
+    course:"C++",
+    title:"C++ Essentials",
+    time:5,
+    questions:[
+        {
+            question:"Which object is used for output in C++?",
+            options:["cin","cout","printf","output"],
+            answer:1,
+            explanation:"cout is the standard output stream in C++."
+        },
+        {
+            question:"What does STL stand for?",
+            options:[
+                "Standard Template Library",
+                "Simple Type Language",
+                "System Template Logic",
+                "Standard Tool Language"
+            ],
+            answer:0,
+            explanation:"STL stands for Standard Template Library."
+        },
+        {
+            question:"Which keyword declares a class?",
+            options:["object","class","define","structure"],
+            answer:1,
+            explanation:"The class keyword is used to declare a class."
+        },
+        {
+            question:"Which operator is used for scope resolution?",
+            options:["::","->","..","##"],
+            answer:0,
+            explanation:"The :: operator is called the scope resolution operator."
+        },
+        {
+            question:"Which feature combines data and methods?",
+            options:["Encapsulation","Compilation","Linking","Casting"],
+            answer:0,
+            explanation:"Encapsulation combines data and methods into a single unit."
+        }
+    ]
+}
+],
+
+coding:[
+{
+    id:1,
+    course:"Python",
+    title:"Reverse a String",
+    difficulty:"Easy",
+    problem:"Write a Python program to reverse a string.",
+    solution:`text=input()
+print(text[::-1])`
+},
+{
+    id:2,
+    course:"Java",
+    title:"Even or Odd",
+    difficulty:"Easy",
+    problem:"Write a Java program to check whether a number is even or odd.",
+    solution:`int n = 10;
+
+if(n % 2 == 0)
+    System.out.println("Even");
+else
+    System.out.println("Odd");`
+},
+{
+    id:3,
+    course:"C",
+    title:"Sum of Two Numbers",
+    difficulty:"Easy",
+    problem:"Write a C program to add two numbers.",
+    solution:`#include <stdio.h>
+
+int main()
+{
+    int a=10,b=20;
+    printf("%d",a+b);
+    return 0;
+}`
+},
+{
+    id:4,
+    course:"C++",
+    title:"Largest Number",
+    difficulty:"Easy",
+    problem:"Write a C++ program to find the largest of two numbers.",
+    solution:`#include <iostream>
+using namespace std;
+
+int main()
+{
+    int a=10,b=20;
+    cout << (a>b ? a : b);
+}`
+}
+],
+
+results:[]
+};
+
+
+/* =====================================================
+   SAVE DATABASE
+===================================================== */
+
+function saveDB(){
+    localStorage.setItem(
+        "codequestDB",
+        JSON.stringify(database)
+    );
+}
+
+
+/* =====================================================
+   CURRENT USER
+===================================================== */
+
+let currentUser = null;
+
+function loginUser(user){
+    currentUser=user;
+    localStorage.setItem(
+        "codequestUser",
+        user.id
+    );
+}
+
+function loadUser(){
+
+    let id=localStorage.getItem("codequestUser");
+
+    if(id){
+        currentUser=
+            database.users.find(u=>u.id===id);
+    }
+}
+
+
+/* =====================================================
+   HOME
+===================================================== */
+
+function home(){
+
+    document.getElementById("app").innerHTML=`
+
+    <nav class="navbar navbar-expand-lg bg-white">
+        <div class="container">
+
+            <a class="navbar-brand">
+                🚀 CodeQuest
+            </a>
+
+            <div>
+                ${
+                    currentUser
+                    ?
+                    `<button class="btn btn-danger"
+                    onclick="logout()">
+                    Logout
+                    </button>`
+                    :
+                    `
+                    <button class="btn btn-outline-primary me-2"
+                    onclick="loginPage()">
+                    Login
+                    </button>
+
+                    <button class="btn btn-primary"
+                    onclick="registerPage()">
+                    Register
+                    </button>
+                    `
+                }
+            </div>
+
+        </div>
+    </nav>
+
+
+    <section class="hero">
+
+        <div class="container">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-7 animate">
+
+                    <span class="badge bg-primary mb-3">
+                        LEARN • PRACTICE • GROW
+                    </span>
+
+                    <h1 class="hero-title">
+                        Learn Coding with
+                        <span class="gradient">
+                        CodeQuest
+                        </span>
+                    </h1>
+
+                    <p class="lead text-secondary mt-4">
+                        Learn Python, Java, C and C++.
+                        Attend quizzes, practice coding,
+                        earn coins and maintain your daily streak.
+                    </p>
+
+                    ${
+                        currentUser
+                        ?
+                        `<button class="btn btn-primary btn-lg"
+                        onclick="dashboard()">
+                        Open Dashboard
+                        </button>`
+                        :
+                        `<button class="btn btn-primary btn-lg"
+                        onclick="registerPage()">
+                        Start Learning
+                        </button>`
+                    }
+
+                </div>
+
+
+                <div class="col-lg-5 text-center">
+
+                    <div class="card-custom float">
+
+                        <div style="font-size:100px">
+                            👨‍💻
+                        </div>
+
+                        <h2>CodeQuest</h2>
+
+                        <p class="text-secondary">
+                            Quiz • Coding • Rewards
+                        </p>
+
+                        <div class="row">
+
+                            <div class="col">
+                                <b>4</b>
+                                <br>
+                                Courses
+                            </div>
+
+                            <div class="col">
+                                <b>∞</b>
+                                <br>
+                                Practice
+                            </div>
+
+                            <div class="col">
+                                <b>🏆</b>
+                                <br>
+                                Rewards
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="container py-5">
+
+        <h2 class="fw-bold mb-4">
+            Popular Courses
+        </h2>
+
+        <div class="row g-4">
+
+            ${courseCards()}
+
+        </div>
+
+    </section>
+
+    <footer class="bg-dark text-white text-center p-4">
+        CodeQuest Learning Platform
+    </footer>
+    `;
+}
+
+
+/* =====================================================
+   COURSE CARDS
+===================================================== */
+
+function courseCards(){
+
+    let courses=[
+        ["Python","🐍","Python programming fundamentals"],
+        ["Java","☕","Core Java and OOP concepts"],
+        ["C","💻","C programming fundamentals"],
+        ["C++","⚙️","C++ and object oriented programming"]
+    ];
+
+    return courses.map(c=>`
+
+        <div class="col-md-6 col-lg-3">
+
+            <div class="card-custom course-card">
+
+                <div class="course-icon">
+                    ${c[1]}
+                </div>
+
+                <h4 class="mt-3">
+                    ${c[0]}
+                </h4>
+
+                <p class="text-secondary">
+                    ${c[2]}
+                </p>
+
+                <button
+                class="btn btn-outline-primary"
+                onclick="showCourse('${c[0]}')">
+
+                Explore
+
+                </button>
+
+            </div>
+
+        </div>
+
+    `).join("");
+
+}
+
+
+/* =====================================================
+   REGISTER
+===================================================== */
+
+function registerPage(){
+
+    document.getElementById("app").innerHTML=`
+
+    <div class="auth">
+
+        <div class="auth-box animate">
+
+            <div class="text-center">
+
+                <h2>🎓 Student Registration</h2>
+
+                <p class="text-secondary">
+                    Create your CodeQuest account
+                </p>
+
+            </div>
+
+            <form onsubmit="register(event)">
+
+                <label class="form-label">
+                    Student Name
+                </label>
+
+                <input
+                id="regName"
+                class="form-control mb-3"
+                required>
+
+
+                <label class="form-label">
+                    Student ID
+                </label>
+
+                <input
+                id="regID"
+                class="form-control mb-3"
+                placeholder="STU002"
+                required>
+
+
+                <label class="form-label">
+                    Email
+                </label>
+
+                <input
+                id="regEmail"
+                type="email"
+                class="form-control mb-3"
+                required>
+
+
+                <label class="form-label">
+                    Password
+                </label>
+
+                <input
+                id="regPassword"
+                type="password"
+                minlength="6"
+                class="form-control mb-3"
+                required>
+
+
+                <button class="btn btn-primary w-100">
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="text-center mt-3">
+
+                Already registered?
+
+                <a href="#"
+                onclick="loginPage()">
+
+                Login
+
+                </a>
+
+            </p>
+
+        </div>
+
+    </div>
+    `;
+}
+
+
+function register(e){
+
+    e.preventDefault();
+
+    let id=document.getElementById("regID").value.trim();
+
+    let email=document.getElementById("regEmail").value.trim();
+
+    if(database.users.some(u=>u.id===id)){
+        alert("Student ID already exists");
+        return;
+    }
+
+    database.users.push({
+
+        id:id,
+
+        name:document.getElementById("regName").value,
+
+        email:email,
+
+        password:document.getElementById("regPassword").value,
+
+        role:"student",
+
+        coins:0,
+
+        streak:1
+
+    });
+
+    saveDB();
+
+    alert("Registration successful!");
+
+    loginPage();
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+function loginPage(){
+
+    document.getElementById("app").innerHTML=`
+
+    <div class="auth">
+
+        <div class="auth-box animate">
+
+            <div class="text-center">
+
+                <div style="font-size:60px">
+                    🔐
+                </div>
+
+                <h2>CodeQuest Login</h2>
+
+                <p class="text-secondary">
+                    Student or Admin
+                </p>
+
+            </div>
+
+            <form onsubmit="login(event)">
+
+                <label class="form-label">
+                    Student/Admin ID or Email
+                </label>
+
+                <input
+                id="loginID"
+                class="form-control mb-3"
+                placeholder="STU001"
+                required>
+
+
+                <label class="form-label">
+                    Password
+                </label>
+
+                <input
+                id="loginPassword"
+                type="password"
+                class="form-control mb-3"
+                required>
+
+
+                <button class="btn btn-primary w-100">
+                    Login
+                </button>
+
+            </form>
+
+            <div class="alert alert-light mt-4">
+
+                <b>Student:</b>
+                STU001 / student123
+
+                <br><br>
+
+                <b>Admin:</b>
+                ADM001 / admin123
+
+            </div>
+
+            <p class="text-center">
+                New student?
+                <a href="#"
+                onclick="registerPage()">
+                Register
+                </a>
+            </p>
+
+        </div>
+
+    </div>
+    `;
+}
+
+
+function login(e){
+
+    e.preventDefault();
+
+    let id=document
+        .getElementById("loginID")
+        .value.trim();
+
+    let password=document
+        .getElementById("loginPassword")
+        .value;
+
+    let user=database.users.find(u=>
+
+        (u.id.toLowerCase()===id.toLowerCase()
+        ||
+        u.email.toLowerCase()===id.toLowerCase())
+
+        &&
+        u.password===password
+
+    );
+
+    if(!user){
+
+        alert("Invalid login details");
+
+        return;
+    }
+
+    loginUser(user);
+
+    if(user.role==="admin")
+        adminDashboard();
+    else
+        dashboard();
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+function logout(){
+
+    currentUser=null;
+
+    localStorage.removeItem(
+        "codequestUser"
+    );
+
+    home();
+}
+
+
+/* =====================================================
+   STUDENT DASHBOARD
+===================================================== */
+
+function dashboard(){
+
+    if(!currentUser)
+        return loginPage();
+
+    if(currentUser.role==="admin")
+        return adminDashboard();
+
+    let results=database.results
+        .filter(r=>r.studentID===currentUser.id);
+
+    let average=results.length
+        ?
+        Math.round(
+            results.reduce(
+                (a,b)=>a+b.percentage,0
+            )/results.length
+        )
+        :0;
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-lg-2 p-0">
+
+                ${studentSidebar()}
+
+            </div>
+
+
+            <div class="col-lg-10 p-4 main">
+
+                <div class="animate">
+
+                    <h2>
+                        Hi, ${currentUser.name} 👋
+                    </h2>
+
+                    <p class="text-secondary">
+                        Continue your learning journey.
+                    </p>
+
+
+                    <div class="row g-3 my-4">
+
+                        <div class="col-6 col-xl-3">
+
+                            <div class="stat">
+
+                                <small>
+                                    Coins
+                                </small>
+
+                                <div class="stat-number coin">
+
+                                    🪙
+                                    ${currentUser.coins}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6 col-xl-3">
+
+                            <div class="stat">
+
+                                <small>
+                                    Daily Streak
+                                </small>
+
+                                <div class="stat-number streak">
+
+                                    🔥
+                                    ${currentUser.streak}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6 col-xl-3">
+
+                            <div class="stat">
+
+                                <small>
+                                    Quizzes
+                                </small>
+
+                                <div class="stat-number">
+
+                                    ${results.length}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6 col-xl-3">
+
+                            <div class="stat">
+
+                                <small>
+                                    Average
+                                </small>
+
+                                <div class="stat-number">
+
+                                    ${average}%
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <h4 class="fw-bold">
+                        Courses
+                    </h4>
+
+                    <div class="row g-4 mt-2">
+
+                        ${courseCards()}
+
+                    </div>
+
+
+                    <div class="card-custom mt-5">
+
+                        <h4>
+                            🔥 Daily Streak
+                        </h4>
+
+                        <p class="text-secondary">
+
+                            Keep logging in every day
+                            to maintain your learning streak.
+
+                        </p>
+
+                        <h1 class="streak">
+
+                            ${currentUser.streak} Days
+
+                        </h1>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+function navbar(){
+
+    return `
+
+    <nav class="navbar navbar-light bg-white">
+
+        <div class="container-fluid">
+
+            <a class="navbar-brand">
+                🚀 CodeQuest
+            </a>
+
+            <div>
+
+                <span class="badge bg-light text-dark me-2">
+
+                    🪙 ${currentUser.coins}
+
+                </span>
+
+                <button
+                class="btn btn-danger btn-sm"
+                onclick="logout()">
+
+                Logout
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    `;
+}
+
+
+/* =====================================================
+   STUDENT SIDEBAR
+===================================================== */
+
+function studentSidebar(){
+
+    return `
+
+    <div class="sidebar">
+
+        <h5 class="mb-4">
+            Student Menu
+        </h5>
+
+        <a href="#"
+        onclick="dashboard()">
+        🏠 Dashboard
+        </a>
+
+        <a href="#"
+        onclick="quizPage()">
+        📝 Quizzes
+        </a>
+
+        <a href="#"
+        onclick="codingPage()">
+        💻 Coding Practice
+        </a>
+
+        <a href="#"
+        onclick="resultsPage()">
+        📊 My Results
+        </a>
+
+        <a href="#"
+        onclick="showCourse()">
+        📚 Courses
+        </a>
+
+    </div>
+
+    `;
+}
+
+
+/* =====================================================
+   COURSES
+===================================================== */
+
+function showCourse(course){
+
+    if(!currentUser){
+
+        return loginPage();
+
+    }
+
+    quizPage(course);
+
+}
+
+
+/* =====================================================
+   QUIZ PAGE
+===================================================== */
+
+function quizPage(course=""){
+
+    let quizzes=database.quizzes;
+
+    if(course)
+        quizzes=quizzes.filter(q=>q.course===course);
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-lg-2 p-0">
+
+                ${studentSidebar()}
+
+            </div>
+
+
+            <div class="col-lg-10 p-4">
+
+                <h2 class="fw-bold">
+                    📝 Available Quizzes
+                </h2>
+
+                <p class="text-secondary">
+                    Choose a course and start your exam.
+                </p>
+
+
+                <div class="row g-4 mt-2">
+
+                    ${quizzes.map(q=>`
+
+                    <div class="col-md-6 col-xl-4">
+
+                        <div class="card-custom course-card">
+
+                            <span class="badge bg-primary">
+                                ${q.course}
+                            </span>
+
+                            <h4 class="mt-3">
+                                ${q.title}
+                            </h4>
+
+                            <p class="text-secondary">
+                                ${q.questions.length}
+                                Questions
+                            </p>
+
+                            <p>
+                                ⏱ ${q.time} Minutes
+                            </p>
+
+                            <button
+                            class="btn btn-primary w-100"
+                            onclick="startQuiz('${q.id}')">
+
+                            Start Quiz
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    `).join("")}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+/* =====================================================
+   QUIZ ENGINE
+===================================================== */
+
+let quiz=null;
+
+function startQuiz(id){
+
+    let q=database.quizzes.find(
+        x=>x.id===id
+    );
+
+    quiz={
+
+        quiz:q,
+
+        current:0,
+
+        answers:Array(q.questions.length)
+            .fill(null),
+
+        time:q.time*60
+
+    };
+
+    renderQuestion();
+
+    quiz.timer=setInterval(()=>{
+
+        quiz.time--;
+
+        let timer=document.getElementById(
+            "timer"
+        );
+
+        if(timer){
+
+            let min=Math.floor(
+                quiz.time/60
+            );
+
+            let sec=quiz.time%60;
+
+            timer.innerText=
+                String(min).padStart(2,"0")
+                +":"
+                +
+                String(sec).padStart(2,"0");
+
+        }
+
+        if(quiz.time<=0){
+
+            clearInterval(quiz.timer);
+
+            finishQuiz();
+
+        }
+
+    },1000);
+
+}
+
+
+/* =====================================================
+   QUESTION
+===================================================== */
+
+function renderQuestion(){
+
+    let q=quiz.quiz;
+
+    let question=
+        q.questions[quiz.current];
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container py-4 animate">
+
+        <div class="d-flex justify-content-between">
+
+            <h3>
+                ${q.title}
+            </h3>
+
+            <h4 id="timer"
+            class="text-danger">
+
+            </h4>
+
+        </div>
+
+
+        <div class="progress my-3">
+
+            <div
+            class="progress-bar"
+            style="
+            width:${((quiz.current+1)/q.questions.length)*100}%;
+            ">
+
+            </div>
+
+        </div>
+
+
+        <div class="card-custom">
+
+            <p class="text-secondary">
+
+                Question
+                ${quiz.current+1}
+                of
+                ${q.questions.length}
+
+            </p>
+
+            <h4 class="mb-4">
+
+                ${question.question}
+
+            </h4>
+
+
+            ${question.options.map(
+                (option,index)=>`
+
+                <div
+                class="option
+                ${quiz.answers[quiz.current]===index
+                ?"selected":""}"
+
+                onclick="selectAnswer(${index})">
+
+                    <b>
+                        ${String.fromCharCode(65+index)}.
+                    </b>
+
+                    ${option}
+
+                </div>
+
+            `).join("")}
+
+
+            <div
+            class="d-flex
+            justify-content-between
+            mt-4">
+
+                <button
+                class="btn btn-outline-secondary"
+                onclick="previousQuestion()"
+                ${quiz.current===0?"disabled":""}>
+
+                    ← Previous
+
+                </button>
+
+
+                ${
+                    quiz.current<
+                    q.questions.length-1
+
+                    ?
+
+                    `<button
+                    class="btn btn-primary"
+                    onclick="nextQuestion()">
+
+                    Next →
+
+                    </button>`
+
+                    :
+
+                    `<button
+                    class="btn btn-success"
+                    onclick="finishQuiz()">
+
+                    Submit Exam
+
+                    </button>`
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+
+    updateTimer();
+
+}
+
+
+/* =====================================================
+   ANSWER
+===================================================== */
+
+function selectAnswer(index){
+
+    quiz.answers[quiz.current]=index;
+
+    renderQuestion();
+
+}
+
+
+function nextQuestion(){
+
+    if(
+        quiz.answers[quiz.current]===null
+    ){
+
+        alert("Please select an answer.");
+
+        return;
+
+    }
+
+    quiz.current++;
+
+    renderQuestion();
+
+}
+
+
+function previousQuestion(){
+
+    if(quiz.current>0){
+
+        quiz.current--;
+
+        renderQuestion();
+
+    }
+
+}
+
+
+function updateTimer(){
+
+    let timer=
+        document.getElementById("timer");
+
+    if(!timer)return;
+
+    let min=Math.floor(
+        quiz.time/60
+    );
+
+    let sec=quiz.time%60;
+
+    timer.innerText=
+        String(min).padStart(2,"0")
+        +":"
+        +
+        String(sec).padStart(2,"0");
+
+}
+
+
+/* =====================================================
+   FINISH QUIZ
+===================================================== */
+
+function finishQuiz(){
+
+    clearInterval(quiz.timer);
+
+    let correct=0;
+
+    quiz.quiz.questions.forEach(
+        (q,i)=>{
+
+            if(
+                quiz.answers[i]===q.answer
+            )
+                correct++;
+
+        }
+    );
+
+
+    let total=quiz.quiz.questions.length;
+
+    let percentage=
+        Math.round(
+            correct/total*100
+        );
+
+
+    let coins=
+        Math.max(
+            10,
+            percentage
+        );
+
+
+    currentUser.coins+=coins;
+
+
+    let result={
+
+        id:Date.now(),
+
+        studentID:currentUser.id,
+
+        studentName:currentUser.name,
+
+        quiz:quiz.quiz.title,
+
+        course:quiz.quiz.course,
+
+        score:correct,
+
+        total:total,
+
+        percentage:percentage,
+
+        coins:coins,
+
+        answers:quiz.answers,
+
+        date:new Date().toLocaleString()
+
+    };
+
+
+    database.results.push(result);
+
+    saveDB();
+
+
+    showResult(result);
+
+}
+
+
+/* =====================================================
+   RESULT
+===================================================== */
+
+function showResult(result){
+
+    let q=database.quizzes.find(
+        x=>x.title===result.quiz
+    );
+
+    let wrong=[];
+
+    q.questions.forEach(
+        (question,index)=>{
+
+            if(
+                result.answers[index]
+                !==question.answer
+            ){
+
+                wrong.push({
+                    question,
+                    index
+                });
+
+            }
+
+        }
+    );
+
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container py-4">
+
+        <div class="card-custom text-center animate">
+
+            <div style="font-size:70px">
+                ${
+                    result.percentage>=80
+                    ?"🏆"
+                    :"📚"
+                }
+            </div>
+
+            <h2>
+                Exam Completed!
+            </h2>
+
+            <p class="text-secondary">
+                Great work ${result.studentName}
+            </p>
+
+
+            <div class="row g-3 justify-content-center mt-4">
+
+                <div class="col-6 col-md-3">
+
+                    <div class="stat">
+
+                        <small>Score</small>
+
+                        <h2>
+                            ${result.score}/${result.total}
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-6 col-md-3">
+
+                    <div class="stat">
+
+                        <small>Percentage</small>
+
+                        <h2>
+                            ${result.percentage}%
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-6 col-md-3">
+
+                    <div class="stat">
+
+                        <small>Coins</small>
+
+                        <h2 class="coin">
+
+                            +${result.coins}
+
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+            class="btn btn-primary mt-4"
+            onclick="dashboard()">
+
+            Dashboard
+
+            </button>
+
+        </div>
+
+
+        <div class="card-custom mt-4">
+
+            <h3>
+                ❌ Wrong Answers & Explanations
+            </h3>
+
+            ${
+                wrong.length
+                ?
+
+                wrong.map(w=>{
+
+                    let question=w.question;
+
+                    let selected=
+                        result.answers[w.index];
+
+                    return `
+
+                    <div
+                    class="border rounded-4 p-3 my-3">
+
+                        <h5>
+                            Q${w.index+1}.
+                            ${question.question}
+                        </h5>
+
+                        <p class="text-danger">
+
+                            Your Answer:
+                            ${
+                                selected===null
+                                ?"Not answered"
+                                :question.options[selected]
+                            }
+
+                        </p>
+
+                        <p class="text-success">
+
+                            Correct Answer:
+                            ${question.options[question.answer]}
+
+                        </p>
+
+                        <div class="alert alert-info">
+
+                            <b>Explanation:</b>
+
+                            ${question.explanation}
+
+                        </div>
+
+                    </div>
+
+                    `;
+
+                }).join("")
+
+                :
+
+                `<div class="alert alert-success">
+                    🎉 Perfect Score! No wrong answers.
+                </div>`
+            }
+
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   RESULTS
+===================================================== */
+
+function resultsPage(){
+
+    let results=
+        database.results.filter(
+            r=>r.studentID===currentUser.id
+        );
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-lg-2 p-0">
+
+                ${studentSidebar()}
+
+            </div>
+
+            <div class="col-lg-10 p-4">
+
+                <h2>
+                    📊 My Results
+                </h2>
+
+                <p class="text-secondary">
+                    Only you can see your results.
+                </p>
+
+
+                <div class="card-custom table-responsive">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Quiz</th>
+                                <th>Course</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
+                                <th>Coins</th>
+                                <th>Date</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            ${
+                                results.map(r=>`
+
+                                <tr>
+
+                                    <td>
+                                        ${r.quiz}
+                                    </td>
+
+                                    <td>
+                                        ${r.course}
+                                    </td>
+
+                                    <td>
+                                        ${r.score}/${r.total}
+                                    </td>
+
+                                    <td>
+                                        <b>
+                                            ${r.percentage}%
+                                        </b>
+                                    </td>
+
+                                    <td class="coin">
+                                        +${r.coins}
+                                    </td>
+
+                                    <td>
+                                        ${r.date}
+                                    </td>
+
+                                </tr>
+
+                                `).join("")
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+/* =====================================================
+   CODING PRACTICE
+===================================================== */
+
+function codingPage(){
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-lg-2 p-0">
+
+                ${studentSidebar()}
+
+            </div>
+
+
+            <div class="col-lg-10 p-4">
+
+                <h2>
+                    💻 Coding Practice
+                </h2>
+
+                <p class="text-secondary">
+                    Practice programming problems.
+                </p>
+
+
+                <div class="row g-4">
+
+                    ${
+                        database.coding.map(c=>`
+
+                        <div class="col-lg-6">
+
+                            <div class="card-custom">
+
+                                <span class="badge bg-primary">
+                                    ${c.course}
+                                </span>
+
+                                <span class="badge bg-success">
+                                    ${c.difficulty}
+                                </span>
+
+                                <h4 class="mt-3">
+                                    ${c.title}
+                                </h4>
+
+                                <p>
+                                    ${c.problem}
+                                </p>
+
+                                <button
+                                class="btn btn-outline-primary"
+                                onclick="showSolution(${c.id})">
+
+                                Show Solution
+
+                                </button>
+
+                                <div
+                                id="solution${c.id}"
+                                class="code mt-3"
+                                style="display:none">
+
+                                ${escapeHTML(c.solution)}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        `).join("")
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+
+function showSolution(id){
+
+    let box=
+        document.getElementById(
+            "solution"+id
+        );
+
+    box.style.display=
+        box.style.display==="none"
+        ?"block"
+        :"none";
+
+}
+
+
+function escapeHTML(text){
+
+    return text
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
+
+}
+
+
+/* =====================================================
+   ADMIN DASHBOARD
+===================================================== */
+
+function adminDashboard(){
+
+    if(!currentUser ||
+       currentUser.role!=="admin")
+        return loginPage();
+
+
+    let students=
+        database.users.filter(
+            u=>u.role==="student"
+        );
+
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-lg-2 p-0">
+
+                ${adminSidebar()}
+
+            </div>
+
+
+            <div class="col-lg-10 p-4">
+
+                <h2>
+                    👨‍💼 Admin Dashboard
+                </h2>
+
+                <p class="text-secondary">
+                    Manage quizzes, coding practice and student results.
+                </p>
+
+
+                <div class="row g-3 my-4">
+
+                    <div class="col-6 col-xl-3">
+
+                        <div class="stat">
+
+                            <small>Students</small>
+
+                            <div class="stat-number">
+                                ${students.length}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6 col-xl-3">
+
+                        <div class="stat">
+
+                            <small>Quizzes</small>
+
+                            <div class="stat-number">
+                                ${database.quizzes.length}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6 col-xl-3">
+
+                        <div class="stat">
+
+                            <small>Coding Problems</small>
+
+                            <div class="stat-number">
+                                ${database.coding.length}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6 col-xl-3">
+
+                        <div class="stat">
+
+                            <small>Total Results</small>
+
+                            <div class="stat-number">
+                                ${database.results.length}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-custom">
+
+                    <h4>
+                        Quick Actions
+                    </h4>
+
+                    <button
+                    class="btn btn-primary me-2 mt-2"
+                    onclick="adminQuizzes()">
+
+                    📝 Manage Quizzes
+
+                    </button>
+
+                    <button
+                    class="btn btn-dark me-2 mt-2"
+                    onclick="adminCoding()">
+
+                    💻 Coding Practice
+
+                    </button>
+
+                    <button
+                    class="btn btn-success mt-2"
+                    onclick="adminResults()">
+
+                    📊 Student Results
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+/* =====================================================
+   ADMIN SIDEBAR
+===================================================== */
+
+function adminSidebar(){
+
+    return `
+
+    <div class="sidebar">
+
+        <h5 class="mb-4">
+            Admin Panel
+        </h5>
+
+        <a onclick="adminDashboard()">
+            🏠 Dashboard
+        </a>
+
+        <a onclick="adminQuizzes()">
+            📝 Manage Quizzes
+        </a>
+
+        <a onclick="adminCoding()">
+            💻 Coding Practice
+        </a>
+
+        <a onclick="adminResults()">
+            📊 Student Results
+        </a>
+
+        <a onclick="adminStudents()">
+            👨‍🎓 Students
+        </a>
+
+    </div>
+
+    `;
+}
+
+
+/* =====================================================
+   ADMIN QUIZZES
+===================================================== */
+
+function adminQuizzes(){
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-lg-2 p-0">
+                ${adminSidebar()}
+            </div>
+
+
+            <div class="col-lg-10 p-4">
+
+                <div class="d-flex
+                justify-content-between
+                align-items-center">
+
+                    <div>
+
+                        <h2>
+                            📝 Manage Quizzes
+                        </h2>
+
+                        <p class="text-secondary">
+                            Create and manage exams.
+                        </p>
+
+                    </div>
+
+                    <button
+                    class="btn btn-primary"
+                    onclick="createQuizPage()">
+
+                    + Create Quiz
+
+                    </button>
+
+                </div>
+
+
+                <div class="row g-4 mt-2">
+
+                    ${
+                        database.quizzes.map(q=>`
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="card-custom">
+
+                                <span class="badge bg-primary">
+                                    ${q.course}
+                                </span>
+
+                                <h4 class="mt-3">
+                                    ${q.title}
+                                </h4>
+
+                                <p>
+                                    ${q.questions.length}
+                                    Questions
+                                </p>
+
+                                <button
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="deleteQuiz('${q.id}')">
+
+                                Delete
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        `).join("")
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+/* =====================================================
+   CREATE QUIZ
+===================================================== */
+
+function createQuizPage(){
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container py-4">
+
+        <div class="card-custom">
+
+            <h2>
+                Create New Quiz
+            </h2>
+
+            <form onsubmit="createQuiz(event)">
+
+                <input
+                id="quizTitle"
+                class="form-control mb-3"
+                placeholder="Quiz title"
+                required>
+
+
+                <select
+                id="quizCourse"
+                class="form-select mb-3">
+
+                    <option>Python</option>
+                    <option>Java</option>
+                    <option>C</option>
+                    <option>C++</option>
+
+                </select>
+
+
+                <input
+                id="quizTime"
+                type="number"
+                class="form-control mb-3"
+                placeholder="Time in minutes"
+                value="5"
+                required>
+
+
+                <textarea
+                id="quizQuestion"
+                class="form-control mb-3"
+                placeholder="Question"
+                required></textarea>
+
+
+                <input
+                id="opt1"
+                class="form-control mb-2"
+                placeholder="Option A"
+                required>
+
+                <input
+                id="opt2"
+                class="form-control mb-2"
+                placeholder="Option B"
+                required>
+
+                <input
+                id="opt3"
+                class="form-control mb-2"
+                placeholder="Option C"
+                required>
+
+                <input
+                id="opt4"
+                class="form-control mb-2"
+                placeholder="Option D"
+                required>
+
+
+                <select
+                id="correct"
+                class="form-select mb-3">
+
+                    <option value="0">
+                        Correct: A
+                    </option>
+
+                    <option value="1">
+                        Correct: B
+                    </option>
+
+                    <option value="2">
+                        Correct: C
+                    </option>
+
+                    <option value="3">
+                        Correct: D
+                    </option>
+
+                </select>
+
+
+                <textarea
+                id="explanation"
+                class="form-control mb-3"
+                placeholder="Wrong answer explanation"
+                required></textarea>
+
+
+                <button class="btn btn-success">
+                    Create Quiz
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+function createQuiz(e){
+
+    e.preventDefault();
+
+
+    let quiz={
+
+        id:"q"+Date.now(),
+
+        course:
+            document.getElementById(
+                "quizCourse"
+            ).value,
+
+        title:
+            document.getElementById(
+                "quizTitle"
+            ).value,
+
+        time:
+            Number(
+                document.getElementById(
+                    "quizTime"
+                ).value
+            ),
+
+        questions:[{
+
+            question:
+                document.getElementById(
+                    "quizQuestion"
+                ).value,
+
+            options:[
+
+                document.getElementById("opt1").value,
+
+                document.getElementById("opt2").value,
+
+                document.getElementById("opt3").value,
+
+                document.getElementById("opt4").value
+
+            ],
+
+            answer:
+                Number(
+                    document.getElementById(
+                        "correct"
+                    ).value
+                ),
+
+            explanation:
+                document.getElementById(
+                    "explanation"
+                ).value
+
+        }]
+
+    };
+
+
+    database.quizzes.push(quiz);
+
+    saveDB();
+
+    alert("Quiz created successfully!");
+
+    adminQuizzes();
+
+}
+
+
+function deleteQuiz(id){
+
+    if(confirm("Delete this quiz?")){
+
+        database.quizzes=
+            database.quizzes.filter(
+                q=>q.id!==id
+            );
+
+        saveDB();
+
+        adminQuizzes();
+
+    }
+
+}
+
+
+/* =====================================================
+   ADMIN CODING
+===================================================== */
+
+function adminCoding(){
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-lg-2 p-0">
+                ${adminSidebar()}
+            </div>
+
+
+            <div class="col-lg-10 p-4">
+
+                <h2>
+                    💻 Coding Practice Management
+                </h2>
+
+                <div class="row g-4 mt-2">
+
+                    ${
+                        database.coding.map(c=>`
+
+                        <div class="col-md-6">
+
+                            <div class="card-custom">
+
+                                <span class="badge bg-primary">
+                                    ${c.course}
+                                </span>
+
+                                <span class="badge bg-success">
+                                    ${c.difficulty}
+                                </span>
+
+                                <h4 class="mt-3">
+                                    ${c.title}
+                                </h4>
+
+                                <p>
+                                    ${c.problem}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        `).join("")
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+/* =====================================================
+   ADMIN RESULTS
+===================================================== */
+
+function adminResults(){
+
+    let results=
+        [...database.results].reverse();
+
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-lg-2 p-0">
+                ${adminSidebar()}
+            </div>
+
+
+            <div class="col-lg-10 p-4">
+
+                <h2>
+                    📊 All Student Results
+                </h2>
+
+                <p class="text-secondary">
+
+                    Only the administrator can see
+                    all student results.
+
+                </p>
+
+
+                <div class="card-custom table-responsive">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Student</th>
+
+                                <th>Quiz</th>
+
+                                <th>Course</th>
+
+                                <th>Score</th>
+
+                                <th>Percentage</th>
+
+                                <th>Coins</th>
+
+                                <th>Date</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            ${
+                                results.length
+
+                                ?
+
+                                results.map(r=>`
+
+                                <tr>
+
+                                    <td>
+                                        <b>
+                                            ${r.studentName}
+                                        </b>
+
+                                        <br>
+
+                                        <small>
+                                            ${r.studentID}
+                                        </small>
+
+                                    </td>
+
+                                    <td>
+                                        ${r.quiz}
+                                    </td>
+
+                                    <td>
+                                        ${r.course}
+                                    </td>
+
+                                    <td>
+                                        ${r.score}/${r.total}
+                                    </td>
+
+                                    <td>
+
+                                        <span class="badge
+                                        ${
+                                            r.percentage>=80
+                                            ?"bg-success"
+                                            :
+                                            r.percentage>=50
+                                            ?"bg-warning"
+                                            :"bg-danger"
+                                        }">
+
+                                            ${r.percentage}%
+
+                                        </span>
+
+                                    </td>
+
+                                    <td class="coin">
+
+                                        🪙
+                                        ${r.coins}
+
+                                    </td>
+
+                                    <td>
+                                        ${r.date}
+                                    </td>
+
+                                </tr>
+
+                                `).join("")
+
+                                :
+
+                                `
+                                <tr>
+                                    <td colspan="7"
+                                    class="text-center p-5">
+
+                                    No student results yet.
+
+                                    </td>
+                                </tr>
+                                `
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+/* =====================================================
+   ADMIN STUDENTS
+===================================================== */
+
+function adminStudents(){
+
+    let students=
+        database.users.filter(
+            u=>u.role==="student"
+        );
+
+
+    document.getElementById("app").innerHTML=`
+
+    ${navbar()}
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-lg-2 p-0">
+                ${adminSidebar()}
+            </div>
+
+
+            <div class="col-lg-10 p-4">
+
+                <h2>
+                    👨‍🎓 Students
+                </h2>
+
+
+                <div class="row g-4 mt-2">
+
+                    ${
+                        students.map(s=>`
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="card-custom">
+
+                                <h4>
+                                    ${s.name}
+                                </h4>
+
+                                <p>
+                                    ID:
+                                    ${s.id}
+                                </p>
+
+                                <p>
+                                    🪙 Coins:
+                                    ${s.coins}
+                                </p>
+
+                                <p class="streak">
+                                    🔥 Streak:
+                                    ${s.streak} days
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        `).join("")
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+}
+
+
+/* =====================================================
+   START APPLICATION
+===================================================== */
+
+loadUser();
+
+if(currentUser){
+
+    if(currentUser.role==="admin")
+        adminDashboard();
+    else
+        dashboard();
+
+}
+else{
+
+    home();
+
+}
+
+</script>
+
+</body>
+</html>
